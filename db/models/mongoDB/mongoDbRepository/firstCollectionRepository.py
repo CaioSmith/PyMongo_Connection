@@ -1,10 +1,10 @@
 from bson.objectid import ObjectId
 from typing import List, Dict
-
+import datetime
 
 class FirstCollectionRepository:
     def __init__(self, db_conn: str) -> None:
-        self.__collection_name = "FirstCollection"
+        self.__collection_name = "transferOrder"
         self.__db_conn = db_conn
         
         
@@ -26,17 +26,29 @@ class FirstCollectionRepository:
             _filter,
             {"_id": 0}
         )
-        response = [elem for elem in data]
+        response = []
+        for elem in data:
+            for key, value in elem.items():
+                if isinstance(value, datetime.datetime):
+                    elem[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+            response.append(elem)
+        
         return response
     
         
     def select_one(self, _filter) -> Dict:
         collection = self.__db_conn.get_collection(self.__collection_name)
-        response = collection.find_one(
+        data = collection.find_one(
             _filter, 
             {"_id": 0}
         )
-        return response
+        if data:
+            for key, value in data.items():
+                if isinstance(value, datetime.datetime):
+                    data[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+            return data
+        else:
+            return {}
         
         
     def select_prop(self, _property: str) -> Dict:
@@ -44,7 +56,12 @@ class FirstCollectionRepository:
         data = collection.find(
             {f"{_property}": {"$exists": True}}
         )
-        response = [elem for elem in data]
+        response = []
+        for elem in data:
+            for key, value in elem.items():
+                if isinstance(value, datetime.datetime):
+                    elem[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+            response.append(elem)
         return response
     
     
@@ -53,7 +70,12 @@ class FirstCollectionRepository:
         data = collection.find(
             {"$or": _propertys}
         )
-        response = [elem for elem in data]
+        response = []
+        for elem in data:
+            for key, value in elem.items():
+                if isinstance(value, datetime.datetime):
+                    elem[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+            response.append(elem)
         return response
     
     
